@@ -4,6 +4,7 @@ import '../utils/interval_timer.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
   @override
   State<HomeScreen> createState() => _HomeScreenState();
 }
@@ -12,6 +13,7 @@ class _HomeScreenState extends State<HomeScreen> {
   late Timer clockTimer;
   String timeString = _formatTime(DateTime.now());
   final TextEditingController intervalController = TextEditingController();
+  final TextEditingController totalDurationController = TextEditingController();
   IntervalTimer? intervalTimer;
 
   static String _formatTime(DateTime now) =>
@@ -33,16 +35,21 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _startIntervalReminder() {
-    final seconds = int.tryParse(intervalController.text);
-    if (seconds == null || seconds <= 0) {
+    final intervalSeconds = int.tryParse(intervalController.text);
+    final totalMinutes = int.tryParse(totalDurationController.text);
+
+    if (intervalSeconds == null || intervalSeconds <= 0 || totalMinutes == null || totalMinutes <= 0) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Enter a valid number of seconds")),
+        const SnackBar(content: Text("Enter valid interval and total duration")),
       );
       return;
     }
 
     intervalTimer?.stop(); // reset if already running
-    intervalTimer = IntervalTimer(seconds: seconds);
+    intervalTimer = IntervalTimer(
+      intervalSeconds: intervalSeconds,
+      totalMinutes: totalMinutes,
+    );
     intervalTimer!.start();
   }
 
@@ -53,7 +60,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("Interval Clock")),
+      appBar: AppBar(title: const Text("Interval Timer Clock")),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -65,11 +72,20 @@ class _HomeScreenState extends State<HomeScreen> {
               controller: intervalController,
               keyboardType: TextInputType.number,
               decoration: const InputDecoration(
-                labelText: "Interval in seconds", // ✅ Updated label
+                labelText: "Interval (in seconds)",
                 border: OutlineInputBorder(),
               ),
             ),
             const SizedBox(height: 16),
+            TextField(
+              controller: totalDurationController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(
+                labelText: "Total Duration (in minutes)",
+                border: OutlineInputBorder(),
+              ),
+            ),
+            const SizedBox(height: 20),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
