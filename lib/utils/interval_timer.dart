@@ -3,20 +3,31 @@ import 'package:audioplayers/audioplayers.dart';
 
 class IntervalTimer {
   final int intervalSeconds;
-  final int totalMinutes;
+  final Duration totalDuration;
+  final void Function() onEnd;
   Timer? _intervalTimer;
   Timer? _endTimer;
   final AudioPlayer _audioPlayer = AudioPlayer();
   bool _isLooping = false;
 
-  IntervalTimer({required this.intervalSeconds, required this.totalMinutes});
+  IntervalTimer({
+    required this.intervalSeconds, 
+    required this.totalDuration,
+    required this.onEnd,
+  });
 
   void start() {
-    _intervalTimer = Timer.periodic(Duration(seconds: intervalSeconds), (_) => _playSound());
+    // Play interval sound periodically
+    _intervalTimer = Timer.periodic(
+      Duration(seconds: intervalSeconds), 
+      (_) => _playSound()
+    );
 
-    _endTimer = Timer(Duration(minutes: totalMinutes), () {
+    // End timer after total duration
+    _endTimer = Timer(totalDuration, () {
       _intervalTimer?.cancel();
       _startLoopingSound(); // Sound when time is up
+      onEnd(); // Call the callback
     });
   }
 
@@ -40,4 +51,3 @@ class IntervalTimer {
     }
   }
 }
-
