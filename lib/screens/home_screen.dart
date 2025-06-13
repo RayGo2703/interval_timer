@@ -376,7 +376,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     child: Center(
                       child: Text(
-                        (isTimerRunning || isTimerPaused) ? 'Stop' : 'Delete',
+                        (isTimerRunning || isTimerPaused) ? 'Cancel' : 'Delete',
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 16,
