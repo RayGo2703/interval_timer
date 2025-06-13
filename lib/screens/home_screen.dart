@@ -24,8 +24,19 @@ class _HomeScreenState extends State<HomeScreen> {
   int totalDurationSeconds = 0;
   int elapsedSeconds = 0;
 
-  static String _formatTime(DateTime now) =>
-      "${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}:${now.second.toString().padLeft(2, '0')}";
+  static String _formatTime(DateTime now) {
+    int hour = now.hour;
+    String period = hour >= 12 ? 'PM' : 'AM';
+    hour = hour % 12;
+    if (hour == 0) hour = 12;
+    return "${hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}:${now.second.toString().padLeft(2, '0')} $period";
+  }
+
+  // Calculate progress (0.0 to 1.0)
+  double get progress {
+    if (totalDurationSeconds == 0) return 0.0;
+    return (totalDurationSeconds - elapsedSeconds) / totalDurationSeconds;
+  }
 
   @override
   void initState() {
@@ -269,15 +280,18 @@ class _HomeScreenState extends State<HomeScreen> {
                   child: Stack(
                     alignment: Alignment.center,
                     children: [
-                      // Outer circle
-                      Container(
+                      // Progress circle
+                      SizedBox(
                         width: 280,
                         height: 280,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: Colors.grey.withAlpha(76),
-                            width: 4,
+                        child: CircularProgressIndicator(
+                          value: progress,
+                          strokeWidth: 4,
+                          backgroundColor: Colors.grey.withAlpha(76),
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            (isTimerRunning || isTimerPaused) ? 
+                            const Color(0xFF6366F1) : // Purple color when timer is active
+                            Colors.grey.withAlpha(76), // Gray when inactive
                           ),
                         ),
                       ),
@@ -388,9 +402,11 @@ class _HomeScreenState extends State<HomeScreen> {
                     width: 120,
                     height: 50,
                     decoration: BoxDecoration(
-                      color: (intervalController.text.isEmpty || durationController.text.isEmpty) && !isTimerPaused
-                          ? const Color(0xFF2C2C2E)
-                          : const Color(0xFF007AFF),
+                      color: isTimerRunning 
+                          ? Colors.red
+                          : (intervalController.text.isEmpty || durationController.text.isEmpty) && !isTimerPaused
+                              ? const Color(0xFF2C2C2E)
+                              : const Color(0xFF007AFF),
                       borderRadius: BorderRadius.circular(25),
                     ),
                     child: Center(
